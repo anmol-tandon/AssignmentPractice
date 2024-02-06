@@ -1,0 +1,63 @@
+Question 1: Explain how FastAPI handles asynchronous requests and its benefits over synchronous code in Python.
+
+Ans1: FastAPI leverages asynchronous programming in Python through the use of the async and await keywords. It is built on top of Starlette and Pydantic, both of which support asynchronous code. FastAPI allows you to define asynchronous endpoints using async def instead of the traditional def.
+
+Benefits of using asynchronous code in FastAPI:
+
+Concurrency: Asynchronous code allows multiple tasks to be executed concurrently without waiting for one to finish before starting the next. This is beneficial for handling a large number of requests simultaneously.
+
+Scalability: Asynchronous programming is particularly useful in scenarios where scalability is essential, such as handling a large number of simultaneous connections or I/O-bound operations.
+
+Improved Performance: Asynchronous code can lead to improved performance by efficiently utilizing resources during waiting periods, for example, when waiting for I/O operations like database queries or external API calls.
+
+Responsive Web Applications: Asynchronous code ensures that the application remains responsive even when performing potentially time-consuming operations, providing a better user experience.
+
+
+Question 2: Describe how dependency injection works in FastAPI and give an example of its practical use.
+
+Ans 2: Dependency injection in FastAPI is a mechanism for managing and injecting dependencies into the route functions or other components of an application. FastAPI uses the Dependency Injection System, allowing you to declare dependencies directly in your route functions.
+
+Example of dependency injection:
+
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.orm import Session
+
+app = FastAPI()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@app.get("/some_data/")
+async def read_data(db: Session = Depends(get_db)):
+    # Use the injected dependency (database session) in the route function
+    return {"message": "Data received"}
+
+
+def get_current_user(db: Session = Depends(get_db)):
+    # Use the database session to fetch the current user
+    return {"username": "fakeuser"}
+
+@app.get("/user/")
+async def read_user(current_user: dict = Depends(get_current_user)):
+    return current_user
+
+
+'''
+In this example, the get_db function is a dependency that provides a database session to the route function read_data. 
+The get_current_user function is another dependency that uses the get_db dependency. 
+These dependencies are then injected into the corresponding route functions.
+'''
+
+
+Question 3: Code walkthrough
+Ans3: In the code, we define SQLAlchemy models BookDB and ReviewDB representing the database tables for books and reviews. We then use these models in the endpoint functions (add_book and submit_review) to interact with the database.
+
+The @app.post("/books/") and @app.post("/reviews/") decorators indicate that these functions handle HTTP POST requests to the specified endpoints. The db: Session = Depends(get_db) parameter in the function signatures represents a dependency injection, providing a database session to the route functions.
+
+Inside these functions, we create instances of the SQLAlchemy models (BookDB and ReviewDB), add them to the database session, commit the changes, and then return the created database objects.
+
+This walkthrough covers the integration of FastAPI with a database and demonstrates how dependencies are used to manage the database sessions in the route functions.
